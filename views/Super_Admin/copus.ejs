@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Observer Copus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Observer/copus.css">
+  <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+   <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %>, <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+      <a href="/super_admin_dashboard" ><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/super_admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+ <a href="/super_admin_copus" class="active"><i class="bi bi-book"></i> Copus</a>
+<a href="/super_admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+<a href="/super_admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+<a href="/super_admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+<a href="/super_admin_setting"><i class="bi bi-gear-fill"></i>Account & Profile Settings</a>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>
+
+      <main class="main-content">
+        <h1>COPUS</h1>
+        <div class="cards">
+          <% if (schedules && schedules.length > 0) { %>
+            <% schedules.forEach(schedule => { %>
+              <div class="card">
+                <div class="approved-schedule-item">
+                  <div class="row">
+                    <div class="col-md-4"><strong>Name:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.firstname %> <%= schedule.lastname %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Department:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.department %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Date:</strong></div>
+                    <div class="col-md-8"><p><%= new Date(schedule.date).toLocaleDateString('en-US') %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Start Time:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.start_time %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>End Time:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.end_time %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Year Level:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.year_level %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Semester:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.semester %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Subject Code:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.subject_code %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Subject Name:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.subject %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Observer:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.observer %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Copus:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.copus %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Mode:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.modality %></p></div>
+                  </div>
+                  <% 
+                    let copusLink = '';
+                    switch (schedule.copus) {
+                      case 'Copus 1':
+                        copusLink = `/super_admin_copus_start_copus1/${schedule._id}`;
+                        break;
+                      case 'Copus 2':
+                        copusLink = `/super_admin_copus_start_copus2/${schedule._id}`;
+                        break;
+                      case 'Copus 3':
+                        copusLink = `/super_admin_copus_start_copus3/${schedule._id}`;
+                        break;
+                      default:
+                        copusLink = '#'; // Fallback for unexpected copus values
+                    }
+                  %>
+                  <form action="<%= copusLink %>" method="get">
+                    <button type="submit" class="result-btn">START COPUS</button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p>No approved schedules found.</p>
+          <% } %>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

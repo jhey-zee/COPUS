@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Observer Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Observer/dashboard.css">
+  <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+     <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/Observer_dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/Observer_copus"><i class="bi bi-book"></i> Copus</a>
+<a href="/Observer_copus_result"><i class="bi bi-people-fill"></i> Copus Result</a>
+<a href="/Observer_copus_history"><i class="bi bi-calendar-event-fill"></i> Copus History</a>
+<a href="/Observer_schedule_management"><i class="bi bi-clipboard-data"></i> Schedule</a>
+<a href="/Observer_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form> 
+      </div>      
+
+      <!-- Main content -->
+      <div class="main-content">
+
+        <div class="metric-container">
+          </div>          
+
+       
+            <div class="section-title mt-4">OBSERVATION CALENDAR</div>
+            <div id="calendar" style="padding: 10px; background-color: #fff; border-radius: 8px;"></div>
+      </div>
+    </div>
+
+  </div>
+  <script src="/js/Super_Admin/dashboard.js"></script>
+  <!-- FullCalendar CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendarEvents = <%- calendarEvents %>;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      height: 500,
+      events: calendarEvents,
+      eventDisplay: 'block'
+    });
+
+    calendar.render();
+  });
+</script>
+
+</body>
+</html>

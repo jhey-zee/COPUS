@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Observer History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Observer/copus_history.css">
+   <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+   <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="custom-sidebar">
+  <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+  <small><%= employeeId %></small>
+  <hr>
+  <a href="/Observer_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/Observer_copus"><i class="bi bi-book"></i> Copus</a>
+<a href="/Observer_copus_result"><i class="bi bi-people-fill"></i> Copus Result</a>
+<a href="/Observer_copus_history" class="active"><i class="bi bi-calendar-event-fill"></i> Copus History</a>
+<a href="/Observer_schedule_management"><i class="bi bi-clipboard-data"></i> Schedule</a>
+<a href="/Observer_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+
+  <hr>
+  <form action="/logout" method="POST">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form>
+</div>
+
+
+    <main class="main-content">
+        <h1> COPUS HISTORY</h1>
+       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+  <input type="text" id="searchInput" class="form-control me-2 mb-2" placeholder="Search by name, department, subject..." style="max-width: 300px;">
+</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>FULLNAME</th>
+                <th>DEPARTMENT</th>
+                <th>DATE</th>
+                <th>START TIME</th>
+                <th>END TIME</th>
+                <th>YEAR LEVEL</th>
+                <th>SEMESTER</th>
+                <th>SUBJECT CODE</th>
+                <th>SUBJECT NAME</th>
+                <th>OBSERVER</th>
+                <th>MODE</th>
+                <th>COPUS</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (completedSchedules && completedSchedules.length > 0) { %>
+                <% completedSchedules.forEach(schedule => { %>
+                <tr>
+                  <td><%= schedule.firstname %> <%= schedule.lastname %></td>
+                  <td><%= schedule.department %></td>
+                  <td><%= new Date(schedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+                  <td><%= schedule.start_time %></td>
+                  <td><%= schedule.end_time %></td>
+                  <td><%= schedule.year_level %></td>
+                  <td><%= schedule.semester %></td>
+                  <td><%= schedule.subject_code %></td>
+                  <td><%= schedule.subject %></td>
+                  <td><%= schedule.observer %></td>
+                  <td><%= schedule.modality %></td>
+                  <td><%= schedule.copus %></td>
+                    <% 
+                       let statusClass = '';
+                       if (schedule.status.toLowerCase() === 'completed') {
+                           statusClass = 'status-completed';
+                       } else if (schedule.status.toLowerCase() === 'cancelled') {
+                           statusClass = 'status-cancelled';
+                       } else if (schedule.status.toLowerCase() === 'pending') {
+                           statusClass = 'status-pending';
+                       }
+                    %>
+                  <td class="<%= statusClass %>"><%= schedule.status %></td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="13" style="text-align: center;">No completed COPUS schedules found.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </main>
+  </div>
+  <script src="/js/Observer/copus_history.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  const rows = Array.from(document.querySelectorAll('tbody tr'));
+  const searchInput = document.getElementById('searchInput');
+  const paginationContainer = document.getElementById('pagination');
+  const rowsPerPage = 10;
+  let currentPage = 1;
+
+  function renderTable(filteredRows = rows) {
+    const tbody = document.querySelector('tbody');
+    tbody.innerHTML = '';
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedRows = filteredRows.slice(start, end);
+
+    paginatedRows.forEach(row => tbody.appendChild(row.cloneNode(true)));
+    updatePagination(filteredRows);
+  }
+
+  function updatePagination(filteredRows) {
+    const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+    paginationContainer.innerHTML = '';
+
+    for (let i = 1; i <= pageCount; i++) {
+      const li = document.createElement('li');
+      li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      li.addEventListener('click', e => {
+        e.preventDefault();
+        currentPage = i;
+        renderTable(filteredRows);
+      });
+      paginationContainer.appendChild(li);
+    }
+  }
+
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.toLowerCase();
+    const filteredRows = rows.filter(row => {
+      return row.textContent.toLowerCase().includes(term);
+    });
+    currentPage = 1;
+    renderTable(filteredRows);
+  });
+
+  renderTable(); // Initial render
+});
+
+  </script>
+</body>
+</html>

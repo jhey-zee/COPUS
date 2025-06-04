@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CIT Faculty History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/CIT_Faculty/copus_history.css">
+  <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="custom-sidebar">
+         <h6>Welcome! <%= firstName %>, <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/CIT_Faculty_dashboard" ><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="CIT_Faculty_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+<a href="/CIT_Faculty_copus_history" class="active"><i class="bi bi-clock-history"></i> Copus History</a>
+<a href="/CIT_Faculty_schedule_management"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+<a href="/CIT_Faculty_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>      
+
+      <!-- Main content -->
+     <main class="main-content">
+  <h1>PERSONAL COPUS HISTORY</h1>
+
+  <div class="table-header">
+    <input type="text" id="searchInput" placeholder="Search..." class="form-control" style="max-width: 300px; float: right; margin-bottom: 10px;">
+  </div>
+
+  <div class="">
+    <table>
+      <thead>
+        <tr>
+          <th>FULLNAME</th>
+          <th>DEPARTMENT</th>
+          <th>DATE</th>
+          <th>START TIME</th>
+          <th>END TIME</th>
+          <th>YEAR LEVEL</th>
+          <th>SEMESTER</th>
+          <th>SUBJECT CODE</th>
+          <th>SUBJECT NAME</th>
+          <th>OBSERVER</th>
+          <th>MODE</th>
+          <th>COPUS</th>
+          <th>STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (completedSchedules && completedSchedules.length > 0) { %>
+          <% completedSchedules.forEach(schedule => { %>
+            <tr>
+              <td><%= schedule.firstname %> <%= schedule.lastname %></td>
+              <td><%= schedule.department %></td>
+              <td><%= new Date(schedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+              <td><%= schedule.start_time %></td>
+              <td><%= schedule.end_time %></td>
+              <td><%= schedule.year_level %></td>
+              <td><%= schedule.semester %></td>
+              <td><%= schedule.subject_code %></td>
+              <td><%= schedule.subject %></td>
+              <td><%= schedule.observer %></td>
+              <td><%= schedule.modality %></td>
+              <td><%= schedule.copus %></td>
+              <% 
+                let statusClass = '';
+                if (schedule.status.toLowerCase() === 'completed') {
+                    statusClass = 'status-completed';
+                } else if (schedule.status.toLowerCase() === 'cancelled') {
+                    statusClass = 'status-cancelled';
+                } else if (schedule.status.toLowerCase() === 'pending') {
+                    statusClass = 'status-pending';
+                }
+              %>
+              <td class="<%= statusClass %>"><%= schedule.status %></td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="13" style="text-align: center;">No completed COPUS schedules found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <!-- Pagination container placed outside the table -->
+    <div id="pagination" class="pagination-controls" style="margin-top: 15px; text-align: center;"></div>
+  </div>
+</main>
+
+  </div>
+  <script src="/js/CIT_Faculty/copus_history.js"></script>
+</body>
+</html>

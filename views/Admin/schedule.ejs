@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Schedule Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Super_Admin/schedule.css">
+</head>
+<body>
+  <header>
+    <div class="logo">LOGO</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="custom-sidebar">
+  <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+  <hr>
+  <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+  <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+  <a href="/admin_schedule" class="active"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+  <a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+  <a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+  <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+  <hr>
+  <form action="/logout" method="POST">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form> 
+</div>
+
+
+       <!-- Main Content -->
+      <div class="main-content">
+      <div class="card-border" id="scheduleManagementView">
+        <div class="section-title title-with-icon">
+          <span>SCHEDULE MANAGEMENT</span>
+          
+        </div>
+          <div class="mb-3">
+  <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, email, role...">
+</div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <tr>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Year Level</th>
+              <th>Semester</th>
+              <th>Subect Code</th>
+              <th>Subect Name</th>
+              <th>Observer</th>
+              <th>Mode</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+            <% if (schedules.length === 0) { %>
+              <tr>
+                <td colspan="12" class="text-center">No schedule records found.</td>
+              </tr>
+            <% } else { %>
+              <% schedules.forEach(schedule => { %>
+                <tr>
+                  <td><%= schedule.firstname %> <%= schedule.lastname %></td>
+                  <td><%= schedule.department %></td>
+                  <td><%= new Date(schedule.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></td>
+                  <td><%= schedule.start_time %></td>
+                  <td><%= schedule.end_time %></td>
+                  <td><%= schedule.year_level %></td>
+                  <td><%= schedule.semester %></td>
+                  <td><%= schedule.subject_code %></td>
+                  <td><%= schedule.subject %></td>
+                  <td><%= schedule.observer %></td>
+                  <td><%= schedule.modality %></td>
+                  <td><span class="badge <%= schedule.status === 'pending' ? 'bg-warning' : (schedule.status === 'completed' ? 'bg-success' : 'bg-danger') %>"><%= schedule.status %></span></td>
+                  <td>
+                    <% if (schedule.status === 'pending') { %>
+                      <form action="/schedule/cancel/<%= schedule._id %>" method="POST" style="display:inline;">
+                        <button class="btn btn-sm btn-danger">Cancel</button>
+                      </form>
+                      <form action="/schedule/complete/<%= schedule._id %>" method="POST" style="display:inline;">
+                        <button class="btn btn-sm btn-success">Complete</button>
+                      </form>
+                      <button 
+                        class="btn btn-sm btn-primary edit-btn"
+                        data-schedule='<%- JSON.stringify(schedule) %>'
+                        data-bs-toggle="modal"
+                        data-bs-target="#editScheduleModal">
+                        Edit
+                      </button>
+                    <% } else { %>
+                      <button class="btn btn-sm btn-danger" disabled>Cancel</button>
+                      <button class="btn btn-sm btn-success" disabled>Complete</button>
+                      <button class="btn btn-sm btn-primary" disabled>Edit</button>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+          </table>
+          <div class="pagination-container mt-3 text-center">
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center" id="pagination">
+      <!-- Pagination buttons will be inserted here by JS -->
+    </ul>
+  </nav>
+</div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <form method="POST" id="editScheduleForm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <input type="hidden" name="id" id="edit-id">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Firstname</label>
+                    <input type="text" name="firstname" id="edit-firstname" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Lastname</label>
+                    <input type="text" name="lastname" id="edit-lastname" class="form-control" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Department</label>
+                    <input type="text" name="department" id="edit-department" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Date</label>
+                    <input type="date" name="date" id="edit-date" class="form-control" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Start Time</label>
+                    <input type="time" name="start_time" id="edit-start-time" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>End Time</label>
+                    <input type="time" name="end_time" id="edit-end-time" class="form-control" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Year / Grade Level</label>
+                    <input type="text" name="year_level" id="edit-year-level" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Semester</label>
+                    <select name="semester" id="edit-semester" class="form-select" required>
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
+                    </select>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Subject Code</label>
+                    <input type="text" name="subject_code" id="edit-subject-code" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Subject</label>
+                    <input type="text" name="subject" id="edit-subject" class="form-control" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Observer</label>
+                    <select name="observer" id="edit-observer" class="form-select" required>
+                      <option value="Sir. Bads">Sir. Bads</option>
+                      <option value="Sir. Jes">Sir. Jes</option>
+                      <option value="Ma'am. Eve">Ma'am. Eve</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Modality / Class Setup</label>
+                    <select name="modality" id="edit-modality" class="form-select" required>
+                      <option value="RAD">RAD</option>
+                      <option value="FLEX">FLEX</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+      
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      
+
+      <!-- ADD SCHEDULE FORM VIEW (hidden by default) -->
+  <div class="card-border" id="addScheduleView" style="display: none;">
+    <div class="palamig section-title">
+      <span>ADD SCHEDULE</span>
+    </div>
+    <div class="buga">
+
+      <form id="addUserForm" method="POST" action="/create_schedule">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="firstname" class="form-label">First Name<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="firstname" id="firstname" required>
+          </div>
+          <div class="col-md-6">
+            <label for="lastname" class="form-label">Last Name<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="lastname" id="lastname" required>
+          </div>
+        </div>
+      
+        <div class="row mb-3">
+          <div class="col-md-6">
+  <label for="department" class="form-label">Department<span class="rar">*</span></label>
+  <select class="form-select" name="department" id="department" required>
+    <option value="">Select Department</option>
+    <option value="CIT DEPARTMENT">CIT DEPARTMENT</option>
+  </select>
+</div>
+          <div class="col-md-3">
+            <label for="date" class="form-label">Date<span class="rar">*</span></label>
+            <input type="date" class="form-control" name="date" id="date" required>
+          </div>
+          <div class="col-md-3">
+            <label for="start_time" class="form-label">Start Time<span class="rar">*</span></label>
+            <input type="time" class="form-control" name="start_time" id="start_time" required>
+          </div>
+          <div class="col-md-3">
+            <label for="end_time" class="form-label">End Time<span class="rar">*</span></label>
+            <input type="time" class="form-control" name="end_time" id="end_time" required>
+          </div>
+        </div>
+      
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="year_level" class="form-label">Year / Grade Level<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="year_level" id="year_level" required>
+          </div>
+          <div class="col-md-4">
+            <label for="semester" class="form-label">Semester<span class="rar">*</span></label>
+            <select class="form-select" name="semester" id="semester" required>
+              <option value="Semester 1">Semester 1</option>
+              <option value="Semester 2">Semester 2</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="subject_code" class="form-label">Subject Code<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="subject_code" id="subject_code" required>
+          </div>
+        </div>
+      
+        <div class="row mb-3">
+          <div class="col-md-5">
+            <label for="subject" class="form-label">Subject Name<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="subject" id="subject" required>
+          </div>
+          <div class="col-md-3">
+            <label for="observer" class="form-label">Observer<span class="rar">*</span></label>
+            <select class="form-select" name="observer" id="observer" required>
+              <option value="Sir. Bads">Sir. Bads</option>
+              <option value="Sir. Jes">Sir. Jes</option>
+              <option value="Ma'am. Eve">Ma'am. Eve</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="modality" class="form-label">Modality / Class Setup<span class="rar">*</span></label>
+            <select class="form-select" name="modality" id="modality" required>
+              <option value="RAD">RAD</option>
+              <option value="FLEX">FLEX</option>
+            </select>            
+          </div>
+        </div>
+      
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary">Add</button>
+          <button type="button" class="btn btn-secondary" id="cancelAddSchedule">Cancel</button>
+        </div>
+      </form>
+      
+  </div>
+    </div>
+  </div>
+
+</div>
+</body>
+
+<script src="/js/Super_Admin/schedule.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Faculty Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Super_Admin/dashboard.css">
+  <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+     <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <span id="notificationBellContainer"> <i class="bi bi-bell-fill" style="color: black;" data-bs-toggle="modal" data-bs-target="#notificationModal"></i>
+            <span id="notificationCountBadge" class="badge bg-danger rounded-pill position-absolute" style="top: -5px; right: -5px; display: none;"></span>
+        </span>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="custom-sidebar">
+        <h6>Welcome! <%= firstName %>, <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/CIT_Faculty_dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="CIT_Faculty_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+<a href="/CIT_Faculty_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+<a href="/CIT_Faculty_schedule_management"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+<a href="/CIT_Faculty_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>  
+
+      <!-- Main content -->
+      <div class="baba col-md-9 mt-3">
+        <div class="metric-container">
+          </div>          
+
+       
+            <div class="section-title mt-4">OBSERVATION CALENDAR</div>
+            <div id="calendar" style="padding: 10px; background-color: #fff; border-radius: 8px;"></div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>You have no new notifications.</p>
+            <p>Example: New COPUS result for [Faculty Name] is available.</p>
+            <p>Example: Appointment scheduled with [Faculty Name] on [Date] at [Time].</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">View All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+  <script src="/js/Super_Admin/dashboard.js"></script>
+  <!-- FullCalendar CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendarEvents = <%- calendarEvents %>;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      height: 500,
+      events: calendarEvents,
+      eventDisplay: 'block'
+    });
+
+    calendar.render();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    // ... (your existing calendar setup) ...
+
+    const notificationModalBody = document.getElementById('notificationModalBody');
+    const notificationBellIcon = document.querySelector('#notificationBellContainer .bi-bell-fill');
+    const notificationCountBadge = document.getElementById('notificationCountBadge');
+
+    async function fetchNotifications() {
+        try {
+            const response = await fetch('/api/notifications'); // Your new API endpoint
+            if (!response.ok) {
+                notificationModalBody.innerHTML = '<p>Could not load notifications.</p>';
+                return;
+            }
+            const data = await response.json();
+
+            if (data.notifications && data.notifications.length > 0) {
+                notificationModalBody.innerHTML = data.notifications.map(notif =>
+                    `<div class="notification-item ${!notif.isRead ? 'unread' : ''}" data-id="${notif._id}">
+                        <p>${notif.message}</p>
+                        <small>${new Date(notif.createdAt).toLocaleString()}</small>
+                        ${notif.link ? `<a href="${notif.link}" class="btn btn-sm btn-link">View Details</a>` : ''}
+                        <hr>
+                    </div>`
+                ).join('');
+
+                if (data.unreadCount > 0) {
+                    notificationCountBadge.textContent = data.unreadCount;
+                    notificationCountBadge.style.display = 'inline-block';
+                } else {
+                    notificationCountBadge.style.display = 'none';
+                }
+
+            } else {
+                notificationModalBody.innerHTML = '<p>You have no new notifications.</p>';
+                notificationCountBadge.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+            notificationModalBody.innerHTML = '<p>Error loading notifications. Please try again later.</p>';
+        }
+    }
+
+    // Mark notifications as read when modal is opened (optional)
+    const notificationModalElement = document.getElementById('notificationModal');
+    if (notificationModalElement) {
+        notificationModalElement.addEventListener('show.bs.modal', async () => {
+            try {
+                 // Only fetch if there are unread notifications indicated by the badge
+                if (notificationCountBadge.style.display !== 'none' && parseInt(notificationCountBadge.textContent) > 0) {
+                    await fetch('/api/notifications/mark-read', { method: 'POST' });
+                    // Optionally, refetch or just clear the badge locally for immediate UI update
+                    notificationCountBadge.style.display = 'none';
+                    notificationCountBadge.textContent = '0';
+                     // You might want to visually update the items in the modal to 'read' state too
+                }
+            } catch (error) {
+                console.error('Failed to mark notifications as read:', error);
+            }
+        });
+    }
+
+
+    // Fetch notifications when the page loads
+    fetchNotifications();
+
+    // Optionally, poll for new notifications every few minutes
+    // setInterval(fetchNotifications, 5 * 60 * 1000); // Every 5 minutes
+</script>
+
+</body>
+</html>

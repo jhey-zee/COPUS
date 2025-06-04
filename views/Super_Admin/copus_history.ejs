@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Super Admin History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Super_Admin/copus_history.css">
+  <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+<header>
+   <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+  <div class="header-icons">
+    <i class="bi bi-bell-fill" style="color: black;"></i>
+    <div class="user-icon-circle">
+      <i class="bi bi-person-fill"></i>
+    </div>
+    <i class="bi bi-caret-down-fill"></i>
+  </div>
+</header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+     <div class="custom-sidebar">
+<h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+  <hr>
+  <a href="/super_admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+  <a href="/super_admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+   <a href="/super_admin_copus"><i class="bi bi-book"></i> Copus</a>
+  <a href="/super_admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+  <a href="/super_admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+  <a href="/super_admin_copus_history" class="active"><i class="bi bi-clock-history"></i> Copus History</a>
+  <a href="/super_admin_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+  <hr>
+  <form action="/logout" method="POST">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form>
+</div>
+
+      <!-- Main content -->
+      <main class="main-content">
+  <h1 class="section-title">COPUS HISTORY</h1>
+
+  <!-- Search bar -->
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap">
+    <input type="text" id="searchInput" class="form-control" style="max-width: 300px;" placeholder="Search history...">
+  </div>
+
+  <!-- Table wrapper -->
+  <div class="table-responsive">
+   
+          <table>
+            <thead>
+              <tr>
+                <th>FULLNAME</th>
+                <th>DEPARTMENT</th>
+                <th>DATE</th>
+                <th>START TIME</th>
+                <th>END TIME</th>
+                <th>YEAR LEVEL</th>
+                <th>SEMESTER</th>
+                <th>SUBJECT CODE</th>
+                <th>SUBJECT NAME</th>
+                <th>OBSERVER</th>
+                <th>MODE</th>
+                <th>COPUS</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (completedSchedules && completedSchedules.length > 0) { %>
+                <% completedSchedules.forEach(schedule => { %>
+                <tr>
+                  <td><%= schedule.firstname %> <%= schedule.lastname %></td>
+                  <td><%= schedule.department %></td>
+                  <td><%= new Date(schedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+                  <td><%= schedule.start_time %></td>
+                  <td><%= schedule.end_time %></td>
+                  <td><%= schedule.year_level %></td>
+                  <td><%= schedule.semester %></td>
+                  <td><%= schedule.subject_code %></td>
+                  <td><%= schedule.subject %></td>
+                  <td><%= schedule.observer %></td>
+                  <td><%= schedule.modality %></td>
+                  <td><%= schedule.copus %></td>
+                    <% 
+                       let statusClass = '';
+                       if (schedule.status.toLowerCase() === 'completed') {
+                           statusClass = 'status-completed';
+                       } else if (schedule.status.toLowerCase() === 'cancelled') {
+                           statusClass = 'status-cancelled';
+                       } else if (schedule.status.toLowerCase() === 'pending') {
+                           statusClass = 'status-pending';
+                       }
+                    %>
+                  <td class="<%= statusClass %>"><%= schedule.status %></td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="13" style="text-align: center;">No completed COPUS schedules found.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+  </div>
+
+  <!-- Pagination controls -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center" id="pagination">
+      <!-- JS will populate this -->
+    </ul>
+  </nav>
+</main>
+
+  </div>
+  <script src="/js/Super_Admin/copus_history.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const table = document.getElementById("historyTable");
+    const rows = Array.from(table.querySelectorAll("tbody tr"));
+    const searchInput = document.getElementById("searchInput");
+    const pagination = document.getElementById("pagination");
+    const rowsPerPage = 5;
+    let currentPage = 1;
+    let filteredRows = [...rows];
+
+    function renderTable(page, data) {
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+
+      rows.forEach(row => row.style.display = "none");
+      data.slice(start, end).forEach(row => row.style.display = "");
+
+      renderPagination(data.length);
+    }
+
+    function renderPagination(totalRows) {
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      pagination.innerHTML = "";
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement("li");
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<button class="page-link">${i}</button>`;
+        li.addEventListener("click", () => {
+          currentPage = i;
+          renderTable(currentPage, filteredRows);
+        });
+        pagination.appendChild(li);
+      }
+    }
+
+    function filterRows() {
+      const query = searchInput.value.toLowerCase();
+      filteredRows = rows.filter(row => 
+        row.innerText.toLowerCase().includes(query)
+      );
+      currentPage = 1;
+      renderTable(currentPage, filteredRows);
+    }
+
+    // Initial render
+    renderTable(currentPage, filteredRows);
+
+    // Event Listeners
+    searchInput.addEventListener("input", filterRows);
+  });
+</script>
+
+</body>
+</html>

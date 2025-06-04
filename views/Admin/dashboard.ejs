@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Super_Admin/dashboard.css">
+</head>
+<body>
+  <header>
+    <div class="logo">LOGO</div>
+    <div class="header-icons">
+     <i class="bi bi-bell-fill" style="color: black; cursor:pointer;" data-bs-toggle="modal" data-bs-target="#notificationModal"></i>
+
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/admin_dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+<a href="/admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+<a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+<a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+<a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form> 
+      </div>      
+
+      <!-- Main content -->
+      <div class="baba col-md-9 mt-3">
+        <div class="metric-container">
+  <div class="metric-card">
+    <div class="metric-icon"><i class="bi bi-bar-chart-fill"></i></div>
+    <div class="metric-value">2</div>
+    <div class="metric-label">TOTAL OF OBSERVATION</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon"><i class="bi bi-person-badge-fill"></i></div>
+    <div class="metric-value">2</div>
+    <div class="metric-label">TOTAL OF OBSERVER</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon"><i class="bi bi-people-fill"></i></div>
+    <div class="metric-value">4</div>
+    <div class="metric-label">TOTAL OF CIT FACULTY</div>
+  </div>
+</div>
+          <!-- Notification Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+          <li class="list-group-item">Observer assigned to Jerald Espares on Feb 3, 2025.</li>
+          <li class="list-group-item">New Copus Result uploaded.</li>
+          <li class="list-group-item">User Management updated successfully.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+       <div class="he section-title">
+  <div class="title-with-icon">
+    <span>Average Result of the CIT Faculty in Student Actions</span>
+    <i class="bal bi-caret-down-fill"></i>
+  </div>
+  <canvas id="facultyChart" height="120"></canvas>
+</div>
+
+        <div class="section-title">OBSERVATION HISTORY</div>
+        <div class="table-responsive">
+          <table class="table table-bordered data-table">
+            <thead class="table-light">
+              <tr>
+                <th>ID #</th>
+                <th>DATE</th>
+                <th>START & END TIME</th>
+                <th>YEAR/COURSE LEVEL - CLASS OBSERVE</th>
+                <th>SUBJECT</th>
+                <th>MODALITY OR CLASS SETUP</th>
+                <th>OBSERVER</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+                <!-- Filled row -->
+                <tr>
+                  <td>COPUS 0001</td>
+                  <td>February 3, 2025</td>
+                  <td>10:00 am - 11:00 am</td>
+                  <td>Year 3</td>
+                  <td>ITE 206 Memory Mgt</td>
+                  <td>FLEX</td>
+                  <td>Baylon - Bullena</td>
+                  <td><span class="text-success fw-bold">Completed</span></td>
+                </tr>
+              
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              </tbody>              
+          </table>
+        </div>
+            <div class="section-title mt-4">OBSERVATION CALENDAR</div>
+            <div id="calendar" style="padding: 10px; background-color: #fff; border-radius: 8px;"></div>
+      </div>
+    </div>
+
+  </div>
+  <script src="/js/Super_Admin/dashboard.js"></script>
+  <!-- FullCalendar CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendarEvents = <%- calendarEvents %>;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      height: 500,
+      events: calendarEvents,
+      eventDisplay: 'block'
+    });
+
+    calendar.render();
+  });
+</script>
+
+</body>
+</html>

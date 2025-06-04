@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Observer Copus Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Observer/copus_result.css">
+   <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;" data-bs-toggle="modal" data-bs-target="#notificationModal"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/Observer_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/Observer_copus"><i class="bi bi-book"></i> Copus</a>
+        <a href="/Observer_copus_result" class="active"><i class="bi bi-people-fill"></i> Copus Result</a>
+        <a href="/Observer_copus_history"><i class="bi bi-calendar-event-fill"></i> Copus History</a>
+        <a href="/Observer_schedule_management"><i class="bi bi-clipboard-data"></i> Schedule</a>
+        <a href="/Observer_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>      
+<main class="main-content">
+        <h1>COPUS RESULT</h1>
+
+        <!-- Search bar -->
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by name..."
+          aria-label="Search by name"
+        />
+
+        <div class="cards">
+          <% if (completedSchedules && completedSchedules.length > 0) { %>
+            <% completedSchedules.forEach(schedule => { %>
+              <div
+                class="card"
+                data-fullname="<%= (schedule.firstname + ' ' + schedule.lastname).toLowerCase() %>"
+              >
+                <div class="info">
+                  <p><strong>Name:</strong> <%= schedule.firstname %> <%= schedule.lastname %></p>
+                  <p><strong>Department:</strong> <%= schedule.department %></p>
+                  <p>
+                    <strong>Date:</strong>
+                    <span class="blue"><%= new Date(schedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                  </p>
+                  <p><strong>Start Time:</strong> <%= schedule.start_time %></p>
+                  <p><strong>End Time:</strong> <%= schedule.end_time %></p>
+                  <p><strong>Year Level:</strong> <%= schedule.year_level %></p>
+                  <p><strong>Semester:</strong> <span class="blue"><%= schedule.semester %></span></p>
+                  <p><strong>Subject Code:</strong> <span class="blue"><%= schedule.subject_code %></span></p>
+                  <p><strong>Subject Name:</strong> <span class="blue"><%= schedule.subject %></span></p>
+                  <p><strong>Observer:</strong> <span class="blue"><%= schedule.observer %></span></p>
+                  <p><strong>Copus:</strong> <span class="blue"><%= schedule.copus %></span></p>
+                  <p><strong>Modality:</strong> <%= schedule.modality %></p>
+                </div>
+
+                <%
+                  let resultRoute = '';
+                  if (schedule.copus === 'Copus 1') {
+                    resultRoute = `/observer_copus_result1/${schedule._id}`;
+                  } else if (schedule.copus === 'Copus 2') {
+                    resultRoute = `/observer_copus_result2/${schedule._id}`;
+                  } else if (schedule.copus === 'Copus 3') {
+                    resultRoute = `/observer_copus_result3/${schedule._id}`;
+                  } else {
+                    resultRoute = `/observer_copus_result`;
+                  }
+                %>
+
+                <form action="<%= resultRoute %>" method="get">
+                  <button type="submit" class="result-btn">VIEW RESULT</button>
+                  <button
+                    type="button"
+                    class="schedule-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#scheduleAppointmentModal"
+                    data-name="<%= schedule.firstname + ' ' + schedule.lastname %>"
+                  >
+                    SCHEDULE APPOINTMENT
+                  </button>
+                </form>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p>No completed observations to display.</p>
+          <% } %>
+        </div>
+      </main>
+
+      <!-- Schedule Appointment Modal -->
+      <div
+        class="modal fade"
+        id="scheduleAppointmentModal"
+        tabindex="-1"
+        aria-labelledby="scheduleAppointmentModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="scheduleAppointmentModalLabel">Schedule New Appointment</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="scheduleAppointmentForm" method="POST" action="/observer_schedule_appointment">
+    <div class="mb-3">
+        <label for="facultyName" class="form-label">Faculty Name</label>
+        <input
+            type="text"
+            class="form-control"
+            id="facultyName"
+            name="facultyName" placeholder="Enter faculty name"
+            readonly
+        />
+    </div>
+    <div class="mb-3">
+        <label for="appointmentDate" class="form-label">Date</label>
+        <input type="date" class="form-control" id="appointmentDate" name="appointmentDate" required/> </div>
+    <div class="mb-3">
+        <label for="appointmentTime" class="form-label">Time</label>
+        <input type="time" class="form-control" id="appointmentTime" name="appointmentTime" required/> </div>
+    <div class="mb-3">
+        <label for="discussionTopic" class="form-label">Discussion Topic</label>
+        <textarea
+            class="form-control"
+            id="discussionTopic"
+            name="discussionTopic" rows="3"
+        ></textarea>
+    </div>
+   <form id="scheduleAppointmentForm" method="POST" action="/observer_schedule_appointment">
+    <input type="hidden" name="observerId" value="<%= user._id %>"> <input type="hidden" name="observerName" value="<%= user.firstName + ' ' + user.lastName %>">
+    <button type="submit" class="btn btn-primary">Submit Appointment</button>
+</form>
+</form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>You have no new notifications.</p>
+            <p>Example: New COPUS result for [Faculty Name] is available.</p>
+            <p>Example: Appointment scheduled with [Faculty Name] on [Date] at [Time].</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">View All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+ <script src="/js/Observer/copus_result.js"></script>
+<script src="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js)"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('.schedule-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const name = button.getAttribute('data-name');
+            document.getElementById('facultyName').value = name;
+        });
+    });
+
+    const searchInput = document.getElementById('searchInput');
+    const cards = document.querySelectorAll('.cards .card');
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        cards.forEach(card => {
+            const fullname = card.getAttribute('data-fullname');
+            if (fullname.includes(query)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // --- JavaScript to show the success/error modal based on passed variables ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get messages passed from the server
+        const successMessage = `<%= typeof successMessage !== 'undefined' ? successMessage : '' %>`;
+        const errorMessage = `<%= typeof errorMessage !== 'undefined' ? errorMessage : '' %>`;
+
+        // Handle Success Modal
+        if (successMessage && successMessage.trim().length > 0) {
+            const successModalElement = document.getElementById('successModal');
+            const successMessageContent = document.getElementById('successMessageContent');
+            if (successModalElement && successMessageContent) {
+                successMessageContent.textContent = successMessage;
+                const successModal = new bootstrap.Modal(successModalElement);
+                successModal.show();
+            }
+        }
+
+        // Handle Error Modal
+        if (errorMessage && errorMessage.trim().length > 0) {
+            const errorModalElement = document.getElementById('errorModal');
+            const errorMessageContent = document.getElementById('errorMessageContent');
+            if (errorModalElement && errorMessageContent) {
+                errorMessageContent.textContent = errorMessage;
+                const errorModal = new bootstrap.Modal(errorModalElement);
+                errorModal.show();
+            }
+        }
+    });
+</script>
+</body>
+</html>
+
+</body>
+</html>

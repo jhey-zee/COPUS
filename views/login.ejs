@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | CIT COPUS</title>
+    <link rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" href="/images/logo.png" type="image/png" />
+  </head>
+  <script src="/js/login.js"></script>
+  <body class="d-flex align-items-center justify-content-center vh-100 bg-light">
+    <div class="card shadow-lg p-4 rounded-4 bg-primary text-white" style="max-width: 400px; width: 100%;">
+      <div class="text-center mb-4">
+        <img src="/images/data-analytics-role.jpg" alt="CIT Logo" style="width: 60px; border-radius: 20px;">
+        <h4 class="mt-3 fw-bold">CIT COPUS Login</h4>
+       
+        
+      </div>
+     <form method="POST" action="/login" onsubmit="validateForm(event)">
+  <!-- Employee ID -->
+  <div class="mb-3 position-relative">
+    <label for="employee" class="form-label text-white">Employee's ID</label>
+    <div class="input-group">
+      <span class="input-group-text bg-white border-0"><i class="bi bi-person-badge-fill text-primary"></i></span>
+      <input type="text" class="form-control" id="employee" name="employee" placeholder="Enter your Employee's ID" required>
+    </div>
+  </div>
+
+
+  <!-- Password -->
+  <div class="mb-3 position-relative">
+    <label for="password" class="form-label text-white">Password</label>
+    <div class="input-group">
+      <span class="input-group-text bg-white border-0"><i class="bi bi-lock-fill text-primary"></i></span>
+      <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+      <span class="input-group-text bg-white border-0 cursor-pointer" onclick="togglePasswordVisibility()">
+        <i class="bi bi-eye-slash-fill text-primary" id="toggleIcon"></i>
+      </span>
+    </div>
+  </div>
+
+
+  <!-- Human Verification -->
+  <div class="mb-3">
+    <label class="form-label text-white">
+      Human Verification: <span id="math-question"></span> = ?
+    </label>
+    <input type="number" class="form-control" id="humanAnswer" name="humanAnswer" required placeholder="Enter answer" />
+    <input type="hidden" id="correctAnswer" name="correctAnswer" />
+  </div>
+
+
+  <!-- Google reCAPTCHA -->
+  <div class="mb-3 text-center">
+    <div class="g-recaptcha d-inline-block" data-sitekey="6LdO1UorAAAAADVb7_8CpvXe0crzY906YgkXtrmX"></div>
+  </div>
+
+
+  <!-- Error Message -->
+  <div id="errorMessage" class="text-danger text-center mb-3" style="display: none;">Invalid credentials. Please try again.</div>
+
+
+  <button type="submit" class="btn btn-light w-100 text-primary fw-bold">Login</button>
+</form>
+      <div class="text-center mt-3">
+        <a href="/forgot-password" class="text-decoration-none text-white-50">Forgot password?</a>
+        <a href="/" class="btn btn-light btn-sm d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; border-radius: 50%;">
+          <i class="bi bi-arrow-left text-primary"></i>
+        </a>
+      </div>
+    </div>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  </body>
+</html>

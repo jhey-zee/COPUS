@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CIT Faculty Setting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Super_Admin/setting.css">
+  <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header> 
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="custom-sidebar">
+        <h6>Welcome! <%= firstName %>, <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/CIT_Faculty_dashboard" ><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="CIT_Faculty_copus_result" ><i class="bi bi-clipboard-data"></i> Copus Result</a>
+<a href="/CIT_Faculty_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+<a href="/CIT_Faculty_schedule_management" ><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+<a href="/CIT_Faculty_setting" class="active"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>
+
+      <div class="main-content">
+        <h5 class="section-title">ACCOUNT SETTINGS</h5>
+    
+        <div class="profile-header">
+          <div class="profile-info">
+            <img src="/images/data-analytics-role.jpg" alt="Profile"> <div>
+              <h6 class="name"><%= firstName %> <%= lastName %></h6>
+            </div>
+          </div>
+          <span class="lock-icon">&#128274;</span>
+        </div>
+    
+       <div class="form-section">
+  <h6 class="section-subtitle">PROFILE INFORMATION</h6>
+  <hr>
+  <form id="profileInfoForm"> <div class="form-row">
+      <div class="form-group">
+        <label for="firstname">FIRST NAME *</label>
+        <input type="text" id="firstname" class="form-control" placeholder="First Name" name="firstname" value="<%= currentUser.firstname || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="lastname">LAST NAME *</label>
+        <input type="text" id="lastname" class="form-control" placeholder="Last Name" name="lastname" value="<%= currentUser.lastname || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="middleInitial">MIDDLE INITIAL</label>
+        <input type="text" id="middleInitial" class="form-control" placeholder="Middle Initial" name="middleInitial" value="<%= currentUser.middleInitial || '' %>" readonly>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="email">PHINMA EMAIL *</label>
+        <input type="email" id="email" class="form-control" placeholder="PHINMA Email" name="email" value="<%= currentUser.email || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="department">DEPARTMENT *</label>
+        <input type="text" id="department" class="form-control" placeholder="Department" name="department" value="<%= currentUser.department || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="dean">DEAN *</label>
+        <input type="text" id="dean" class="form-control" placeholder="Dean" name="dean" value="<%= currentUser.dean || '' %>" readonly>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="assignedProgramHead">ASSIGNED PROGRAM HEAD (IF APPLICABLE)</label>
+        <input type="text" id="assignedProgramHead" class="form-control" placeholder="Assigned Program Head" name="assignedProgramHead" value="<%= currentUser.assignedProgramHead || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="yearsOfTeachingExperience">YEARS OF TEACHING EXPERIENCE IN PHINMA ED *</label>
+        <input type="text" id="yearsOfTeachingExperience" class="form-control" placeholder="Years of Teaching" name="yearsOfTeachingExperience" value="<%= currentUser.yearsOfTeachingExperience || '' %>" readonly>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="yearHired">YEAR HIRED *</label>
+        <input type="text" id="yearHired" class="form-control" placeholder="Year Hired" name="yearHired" value="<%= currentUser.yearHired || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="yearRegularized">YEAR REGULARIZED *</label>
+        <input type="text" id="yearRegularized" class="form-control" placeholder="Year Regularized" name="yearRegularized" value="<%= currentUser.yearRegularized || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="highestEducationalAttainment">HIGHEST EDUCATIONAL ATTAINMENT *</label>
+        <input type="text" id="highestEducationalAttainment" class="form-control" placeholder="Educational Attainment" name="highestEducationalAttainment" value="<%= currentUser.highestEducationalAttainment || '' %>" readonly>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="professionalLicense">PROFESSIONAL LICENSE *</label>
+        <input type="text" id="professionalLicense" class="form-control" placeholder="Professional License" name="professionalLicense" value="<%= currentUser.professionalLicense || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="employmentStatus">EMPLOYMENT STATUS *</label>
+        <input type="text" id="employmentStatus" class="form-control" placeholder="Employment Status" name="employmentStatus" value="<%= currentUser.employmentStatus || '' %>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="rank">RANK *</label>
+        <input type="text" id="rank" class="form-control" placeholder="Rank" name="rank" value="<%= currentUser.rank || '' %>" readonly>
+      </div>
+    </div>
+    <button type="button" id="updateProfileInfoBtn" class="primary-btn">UPDATE INFORMATION</button>
+  </form>
+</div>
+
+<div class="modal fade" id="confirmProfileUpdateModal" tabindex="-1" aria-labelledby="confirmProfileUpdateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="confirmProfileUpdateModalLabel">Edit Profile Information</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="profileUpdateReviewContent" class="p-3"></div>
+        <div id="profileUpdateErrorAlert" class="alert alert-danger mt-3" style="display:none;" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="submitProfileUpdateBtn" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+    
+       <div class="form-section">
+          <h6 class="section-subtitle">PASSWORD</h6>
+          <hr>
+          <form class="password-form">
+            <div class="form-content">
+              <!-- Left Column: Inputs -->
+              <div class="form-fields">
+                <div class="fof">
+                  <label>CURRENT PASSWORD *</label>
+                  <input type="password" placeholder="Current Password" readonly>
+                </div>
+                <div class="fof">
+                  <label>NEW PASSWORD *</label>
+                  <input type="password" placeholder="New Password" readonly>
+                </div>
+                <div class="fof">
+                  <label>RE-TYPE NEW PASSWORD *</label>
+                  <input type="password" placeholder="Confirm New Password" readonly>
+                </div>
+              </div>
+        
+              <div class="help-img">
+                <img src="https://cdn-icons-png.flaticon.com/512/3106/3106921.png" alt="Password Help">
+              </div>
+            </div>
+            <button type="button" class="primary-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">UPDATE PASSWORD</button>
+          </form>
+        </div>
+        
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="mb-3">
+              <label for="currentPassword" class="form-label">CURRENT PASSWORD *</label>
+              <input type="password" class="form-control" id="currentPassword" name="currentPassword" placeholder="Current Password" required>
+            </div>
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">NEW PASSWORD *</label>
+              <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="New Password" required>
+            </div>
+            <div class="mb-3">
+              <label for="confirmNewPassword" class="form-label">RE-TYPE NEW PASSWORD *</label>
+              <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm New Password" required>
+            </div>
+            <div id="passwordErrorAlert" class="alert alert-danger mt-3" style="display:none;" role="alert"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="submitChangePasswordBtn" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/CIT_Faculty/setting.js"></script>
+</body>
+</html>

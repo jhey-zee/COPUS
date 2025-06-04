@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CIT Faculty Schedule Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/CIT_Faculty/schedule_management.css">
+</head>
+<style>
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #f44336; /* red */
+    color: white;
+    padding: 16px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 9999;
+    min-width: 250px;
+    max-width: 300px;
+  }
+
+  .toast-container button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+
+  .toast-container.hide {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+
+  .toast-container.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+.search-input {
+  padding: 8px;
+  max-width: 300px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+</style>
+
+<body>
+  <header>
+    <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header> 
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="custom-sidebar">
+          <h6>Welcome! <%= firstName %>, <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+       <a href="/CIT_Faculty_dashboard" ><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="CIT_Faculty_copus_result" ><i class="bi bi-clipboard-data"></i> Copus Result</a>
+<a href="/CIT_Faculty_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+<a href="/CIT_Faculty_schedule_management" class="active"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+<a href="/CIT_Faculty_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div> 
+
+        <div class="main-content">
+      <div class="card-border" id="scheduleManagementView">
+        <% if (typeof errorMessage !== 'undefined') { %>
+          <div id="customToast" class="toast-container show">
+            <span><%= errorMessage %></span>
+            <button onclick="closeToast()">×</button>
+          </div>
+        <% } %>
+        <div class="section-title title-with-icon">
+          <span>SCHEDULE MANAGEMENT</span>
+          <div class="create-account-wrapper" title="Create Account">
+            <i class="bi bi-plus-circle create-account-icon"></i>
+          </div>
+
+        </div>
+        <div class="">
+          <table class="custom-table">
+             <input
+    type="text"
+    id="tableSearch"
+    placeholder="Search schedules..."
+    class="search-input"
+  />
+  <table id="scheduleTable" class="custom-table">
+
+            <tr>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Year Level</th>
+              <th>Semester</th>
+              <th>Subject Code</th>
+              <th>Subject Name</th>
+              <th>Observer</th>
+              <th>Modality</th>
+              <th>Copus</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+            <% if (schedules.length === 0) { %>
+              <tr>
+                <td colspan="14" class="text-center">No schedule records found.</td>
+              </tr>
+            <% } else { %>
+              <% schedules.forEach(schedule => { %>
+                <tr>
+                  <td><%= schedule.firstname %> <%= schedule.lastname %></td>
+                  <td><%= schedule.department %></td>
+                  <td><%= new Date(schedule.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></td>
+                  <td><%= schedule.start_time %></td>
+                  <td><%= schedule.end_time %></td>
+                  <td><%= schedule.year_level %></td>
+                  <td><%= schedule.semester %></td>
+                  <td><%= schedule.subject_code %></td>
+                  <td><%= schedule.subject %></td>
+                  <td><%= schedule.observer %></td>
+                  <td><%= schedule.modality %></td>
+                  <td><%= schedule.copus %></td>
+                  <td>
+                    <span class="badge 
+                      <%= schedule.status === 'pending' ? 'bg-warning' : 
+                          schedule.status === 'completed' ? 'bg-success' : 
+                          schedule.status === 'approved' ? 'bg-primary' : 
+                          'bg-danger' %>">
+                      <%= schedule.status %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (schedule.status === 'pending') { %>
+                      <form action="/faculty/schedule/cancel/<%= schedule._id %>" method="POST" style="display:inline;">
+                        <button class="btn btn-sm btn-danger">Cancel</button>
+                      </form>
+                      <button 
+                        class="btn btn-sm btn-primary edit-btn"
+                        data-schedule='<%- JSON.stringify(schedule) %>'
+                        data-bs-toggle="modal"
+                        data-bs-target="#editScheduleModal">
+                        Edit
+                      </button>
+                    <% } else { %>
+                      <button class="btn btn-sm btn-danger" disabled>Cancel</button>
+                      <button class="btn btn-sm btn-primary" disabled>Edit</button>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </table>
+        </div>
+      </div>
+<div id="pagination" class="mt-3"></div>
+
+      <div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <form method="POST" id="editScheduleForm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <input type="hidden" name="id" id="edit-id">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Firstname</label>
+                    <input type="text" name="firstname" id="edit-firstname" class="form-control" value="<%= firstName %>" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Lastname</label>
+                    <input type="text" name="lastname" id="edit-lastname" class="form-control" value="<%= lastName %>" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Department</label>
+                    <input type="text" name="department" id="edit-department" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Date</label>
+                    <input type="date" name="date" id="edit-date" class="form-control" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Start Time</label>
+                    <input type="time" name="start_time" id="edit-start-time" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>End Time</label>
+                    <input type="time" name="end_time" id="edit-end-time" class="form-control" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Year / Grade Level</label>
+                    <input type="text" name="year_level" id="edit-year-level" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Semester</label>
+                    <select name="semester" id="edit-semester" class="form-select" required>
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
+                    </select>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label>Subject Code</label>
+                    <input type="text" name="subject_code" id="edit-subject-code" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Subject</label>
+                    <input type="text" name="subject" id="edit-subject" class="form-control" required>
+                  </div>
+                </div>
+      
+                <div class="row mb-3">
+                  <div class="col-md-4">
+                    <label>Observer</label>
+                    <select name="observer" id="edit-observer" class="form-select" required>
+                      <option value="Sir. Bads">Sir. Bads</option>
+                      <option value="Sir. Jes">Sir. Jes</option>
+                      <option value="Ma'am. Eve">Ma'am. Eve</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label>Modality / Class Setup</label>
+                    <select name="modality" id="edit-modality" class="form-select" required>
+                      <option value="RAD">RAD</option>
+                      <option value="FLEX">FLEX</option>
+                    </select> 
+                  </div>
+                  <div class="col-md-4">
+                    <label>Copus</label>
+                    <select name="copus" id="edit-copus" class="form-select" required>
+                      <option value="Copus 1">Copus 1</option>
+                      <option value="Copus 2">Copus 2</option>
+                      <option value="Copus 3">Copus 3</option>
+                    </select> 
+                  </div>
+                </div>
+              </div>
+      
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      
+
+      <div class="card-border" id="addScheduleView" style="display: none;">
+    <div class="palamig section-title">
+      <span>ADD SCHEDULE</span>
+    </div>
+    <div class="buga">
+
+      <form id="addUserForm" method="POST" action="/faculty_create_schedule">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="firstname" class="form-label">First Name<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="firstname" id="firstname" value="<%= firstName %>" required>
+          </div>
+          <div class="col-md-6">
+            <label for="lastname" class="form-label">Last Name<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="lastname" id="lastname" value="<%= lastName %>" required>
+          </div>
+        </div>
+      
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="department" class="form-label">Department<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="department" id="department" value="<%= department %>" required>
+          </div>
+          <div class="col-md-3">
+            <label for="date" class="form-label">Date<span class="rar">*</span></label>
+            <input type="date" class="form-control" name="date" id="date" required>
+          </div>
+          <div class="col-md-3">
+            <label for="start_time" class="form-label">Start Time<span class="rar">*</span></label>
+            <input type="time" class="form-control" name="start_time" id="start_time" required>
+          </div>
+          <div class="col-md-3">
+            <label for="end_time" class="form-label">End Time<span class="rar">*</span></label>
+            <input type="time" class="form-control" name="end_time" id="end_time" required>
+          </div>
+        </div>
+      
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="year_level" class="form-label">Year / Grade Level<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="year_level" id="year_level" required>
+          </div>
+          <div class="col-md-4">
+            <label for="semester" class="form-label">Semester<span class="rar">*</span></label>
+            <select class="form-select" name="semester" id="semester" required>
+              <option value="Semester 1">Semester 1</option>
+              <option value="Semester 2">Semester 2</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="subject_code" class="form-label">Subject Code<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="subject_code" id="subject_code" required>
+          </div>
+        </div>
+      
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="subject" class="form-label">Subject Name<span class="rar">*</span></label>
+            <input type="text" class="form-control" name="subject" id="subject" required>
+          </div>
+          <div class="col-md-4">
+            <label for="observer" class="form-label">Observer<span class="rar">*</span></label>
+            <select class="form-select" name="observer" id="observer" required>
+              <option value="" disabled selected>Select an observer</option>
+              <% observers.forEach(observer => { %>
+                <option value="<%= observer.firstname %> <%= observer.lastname %>"><%= observer.firstname %> <%= observer.lastname %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="modality" class="form-label">Modality / Class Setup<span class="rar">*</span></label>
+            <select class="form-select" name="modality" id="modality" required>
+              <option value="RAD">RAD</option>
+              <option value="FLEX">FLEX</option>
+            </select>            
+          </div>
+          <div class="col-md-4">
+            <label for="copus" class="form-label">Copus<span class="rar">*</span></label>
+            <select class="form-select" name="copus" id="copus" required>
+              <option value="Copus 1">Copus 1</option>
+              <option value="Copus 2">Copus 2</option>
+              <option value="Copus 3">Copus 3</option>
+            </select>            
+          </div>
+        </div>
+      
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary">Add</button>
+          <button type="button" class="btn btn-secondary" id="cancelAddSchedule">Cancel</button>
+        </div>
+      </form>
+      
+  </div>
+    </div>
+  </div>
+
+</div>
+</body>
+
+<script src="/js/CIT_Faculty/schedule_management.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function closeToast() {
+    const toast = document.getElementById('customToast');
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+  }
+
+  // Auto-hide the toast after 5 seconds
+  window.addEventListener('DOMContentLoaded', () => {
+    const toast = document.getElementById('customToast');
+    if (toast) {
+      setTimeout(() => {
+        closeToast();
+      }, 5000);
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('tableSearch');
+    const table = document.getElementById('scheduleTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    searchInput.addEventListener('keyup', function() {
+      const searchTerm = this.value.toLowerCase();
+
+      for (let row of rows) {
+        const rowText = row.textContent.toLowerCase();
+
+        if (rowText.indexOf(searchTerm) > -1) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    });
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+  const rowsPerPage = 10;  // Number of rows per page
+  const table = document.getElementById('scheduleTable');
+  const tbody = table.getElementsByTagName('tbody')[0];
+  const rows = Array.from(tbody.getElementsByTagName('tr'));
+  const pagination = document.getElementById('pagination');
+  const searchInput = document.getElementById('tableSearch');
+
+  let currentPage = 1;
+  let filteredRows = rows;
+
+  function displayRows(page) {
+    // Calculate start and end index
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    // Hide all rows first
+    rows.forEach(row => row.style.display = 'none');
+
+    // Show only rows for the current page
+    filteredRows.slice(start, end).forEach(row => row.style.display = '');
+
+    currentPage = page;
+    renderPagination();
+  }
+
+  function renderPagination() {
+    pagination.innerHTML = '';
+
+    const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+    if (pageCount <= 1) return; // No need to paginate if only 1 page
+
+    // Create Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = 'Prev';
+    prevBtn.classList.add('btn', 'btn-secondary', 'me-2');
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.addEventListener('click', () => displayRows(currentPage - 1));
+    pagination.appendChild(prevBtn);
+
+    // Create page number buttons
+    for (let i = 1; i <= pageCount; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.textContent = i;
+      pageBtn.classList.add('btn', 'btn-outline-primary', 'me-1');
+      if (i === currentPage) {
+        pageBtn.classList.add('active');
+        pageBtn.disabled = true;
+      }
+      pageBtn.addEventListener('click', () => displayRows(i));
+      pagination.appendChild(pageBtn);
+    }
+
+    // Create Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next';
+    nextBtn.classList.add('btn', 'btn-secondary', 'ms-2');
+    nextBtn.disabled = currentPage === pageCount;
+    nextBtn.addEventListener('click', () => displayRows(currentPage + 1));
+    pagination.appendChild(nextBtn);
+  }
+
+  // Search functionality that works with pagination
+  searchInput.addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+
+    filteredRows = rows.filter(row => {
+      const rowText = row.textContent.toLowerCase();
+      return rowText.includes(searchTerm);
+    });
+
+    displayRows(1);  // Reset to page 1 with filtered rows
+  });
+
+  // Initial display
+  displayRows(1);
+});
+
+
+</script>
+
+</html>
